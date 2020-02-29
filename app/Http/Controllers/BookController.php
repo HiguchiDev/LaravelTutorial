@@ -25,16 +25,15 @@ class BookController extends Controller
     public function index()
     {
         //https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=(発行されたアクセスキー）&range=1&sort=2
-        $ReqURL = 'https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=2e49b5d121c0f40773b048f7b7d403f8&name=山さわ';
+        /*$ReqURL = 'https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=2e49b5d121c0f40773b048f7b7d403f8&name=山さわ';
 
         //file_get_contentsでレスポンスを処理
         $json = file_get_contents($ReqURL);
         //JSONをデコード
         $json_value = json_decode($json, true);
 
-        var_dump($json_value['rest'][0]['update_date']);
-
-
+        var_dump($json_value['rest'][0]['update_date']); 
+        */
         //************************************* */
 
         /*
@@ -81,13 +80,18 @@ class BookController extends Controller
 
     public function store(Request $request)
     {
+        /*
         $book = new Book();
         $book->name = $request->name;
         $book->price = $request->price;
         $book->author = $request->author;
         $book->save();
+        */
+        //echo "a";
+        //echo $request->latitude;
 
-        return redirect("/book");
+        var_dump($request->latitude);
+        //return redirect("/book");
     }
 
     public function destroy($id)
