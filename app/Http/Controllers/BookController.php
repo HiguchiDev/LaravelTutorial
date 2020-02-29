@@ -8,6 +8,20 @@ use App\Book;
 
 class BookController extends Controller
 {
+    /*public function grabIpInfo($ip)
+    {
+        $curl = curl_init();
+
+        curl_setopt($curl, CURLOPT_URL, "https://api.ipgeolocationapi.com/geolocate/" . $ip);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+        $returnData = curl_exec($curl);
+
+        curl_close($curl);
+
+        return $returnData;
+    }
+    */
     public function index()
     {
         //https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=(発行されたアクセスキー）&range=1&sort=2
@@ -21,10 +35,16 @@ class BookController extends Controller
         var_dump($json_value['rest'][0]['update_date']);
 
 
+        //************************************* */
 
+        /*
+        $ipInfo = $this->grabIpInfo($_SERVER["REMOTE_ADDR"]);
+        $ipJsonInfo = json_decode($ipInfo);
 
-
+        var_dump($ipJsonInfo);
+*/
         
+        //************************************* */
         // DBよりBookテーブルの値を全て取得
         $books = Book::all();
 
