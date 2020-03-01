@@ -13,6 +13,7 @@
 
 //Route::get('book', 'BookController@index');
 Route::resource('book', 'BookController');
+Route::resource('shopSearch', 'ShopSearchController');
 Route::get('/', function () {
     return view('welcome');
 });

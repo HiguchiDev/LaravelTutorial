@@ -90,8 +90,8 @@ class BookController extends Controller
         //echo "a";
         //echo $request->latitude;
 
-        var_dump($request->latitude);
-        //return redirect("/book");
+        //var_dump($request->latitude);
+        return redirect("/book");
     }
 
     public function destroy($id)
