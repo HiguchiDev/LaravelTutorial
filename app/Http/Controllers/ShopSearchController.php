@@ -34,8 +34,14 @@ class ShopSearchController extends Controller
             $jsonList = $this->getShopInfoFromAPI($request);
             $request->session()->put($shopInfoSessionKey, $jsonList);
         }
-                
-        $randomIndex = rand(0, 99);
+        
+        $max = 99;
+
+        if(count($jsonList) <= $max){
+            $max = count($jsonList) - 1;
+        }
+
+        $randomIndex = rand(0, $max);
         $shopInfoList = array_slice($jsonList, $randomIndex, 1, true);   //なんでキーがrandomIndexの連想配列が返却されるんだ・・・？
         $shopInfo = $shopInfoList[$randomIndex];
         
