@@ -34,7 +34,7 @@
                 document.getElementById("longitude").value = longitude;
         });
 
-        document.write(latitude);
+        document.write("aaaaa");
         document.write(longitude);
     } else {
         window.alert("本ブラウザではGeolocationが使えません");
