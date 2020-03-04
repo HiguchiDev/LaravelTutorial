@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<form action = "/shopSearch" method = "post">
+<form action = "/" method = "post">
   <input type="hidden" name="_token" value="{{ csrf_token() }}">
   <input id="latitude"  type="hidden" type="text" name="latitude">
   <input id="longitude" type="hidden" type="text" name="longitude">

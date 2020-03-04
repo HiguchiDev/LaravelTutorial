@@ -42,14 +42,16 @@ class ShopSearchController extends Controller
         $latitudeAndLongitude = "緯度：" . $request->session()->get($sessionId . 'latitude') . " ";
         $latitudeAndLongitude .= "経度：" . $request->session()->get($sessionId . 'longitude');
 
+        //echo $latitudeAndLongitude;
+        //echo $this->getAddress($request->session()->get($sessionId . 'latitude'), $request->session()->get($sessionId . 'longitude'));
+        //echo $shopInfo["address"];
+        
         $distance = $this->location_distance(
-            $shopInfo["latitude"],
-            $shopInfo["longitude"],
-            $request->session()->get($sessionId . 'latitude'),
-            $request->session()->get($sessionId . 'longitude')
+            $this->getAddress($request->session()->get($sessionId . 'latitude'), $request->session()->get($sessionId . 'longitude')),
+            $shopInfo["address"]
         );
 
-        $distance["distance"];
+        //var_dump( $distance );
         // 取得したいwebサイトを読み込み
         //$html = file_get_contents($shopInfo['url']);
         //echo phpQuery::newDocument($html)->find("img")->text("src");
@@ -63,8 +65,31 @@ class ShopSearchController extends Controller
 
     //$lat1, $lon1 --- A地点の緯度経度
     //$lat2, $lon2 --- B地点の緯度経度
-    public function location_distance($lat1, $lon1, $lat2, $lon2)
+    public function location_distance($from, $to)
     {
+        
+        $from = urlencode($from);
+        $to = urlencode($to);
+
+        
+        //echo $to;
+        $reqURL = 'https://maps.googleapis.com/maps/api/directions/json?origin=';
+        $reqURL .= $from;
+        $reqURL .= '&destination=';
+        $reqURL .= $to;
+        $reqURL .= '&mode=walking&language=ja&key=AIzaSyDkAkXUpnqoNqbhQ8sdzM7URod4sZYxUr0';
+
+        //var_dump( $reqURL);
+        
+        //file_get_contentsでレスポンスを処理
+        $json = file_get_contents($reqURL);
+        //JSONをデコード
+        $jsonList = json_decode($json, true);
+
+
+        return $jsonList['routes'][0]['legs'][0]['distance'];
+
+        /*
         $lat_average = deg2rad($lat1 + (($lat2 - $lat1) / 2));//２点の緯度の平均
         $lat_difference = deg2rad($lat1 - $lat2);//２点の緯度差
         $lon_difference = deg2rad($lon1 - $lon2);//２点の経度差
@@ -87,27 +112,23 @@ class ShopSearchController extends Controller
         //$hoge['distance']で小数点付きの直線距離を返す（メートル）
         //$hoge['distance_unit']で整形された直線距離を返す（1000m以下ならメートルで記述 例：836m ｜ 1000m以下は小数点第一位以上の数をkmで記述 例：2.8km）
         return array("distance" => $distance, "distance_unit" => $distance_unit);
+        */
     }
 
-    private function getPosition($address)
+    private function getAddress($latitude, $longitude)
     {
         mb_language("Japanese");//文字コードの設定
         mb_internal_encoding("UTF-8");
 
         //住所を入れて緯度経度を求める。
-        $myKey = "AIzaSyDkAkXUpnqoNqbhQ8sdzM7URod4sZYxUr0";
+        //$address = urlencode($address);
 
-        $address = urlencode($address);
-
-        $url = "https://maps.googleapis.com/maps/api/geocode/json?address=" . $address . "+CA&key=" . $myKey ;
+        $url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $latitude . ',' . $longitude . '&key=AIzaSyDkAkXUpnqoNqbhQ8sdzM7URod4sZYxUr0&language=ja';
 
         $contents= file_get_contents($url);
         $jsonData = json_decode($contents, true);
 
-        $lat = $jsonData["results"][0]["geometry"]["location"]["lat"];
-        $lng = $jsonData["results"][0]["geometry"]["location"]["lng"];
-        
-        return array($lat, $lng);
+        return str_replace('日本、', '', $jsonData["results"][0]["formatted_address"]);
     }
 
     private function getShopInfoFromAPI(Request $request)
