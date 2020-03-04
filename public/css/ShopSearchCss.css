@@ -1,0 +1,49 @@
+body {
+  background-color: #f0f8ff;
+  }
+
+.shopInfo {
+  background: #fffafa;
+  width: 350px;
+  text-align: center;
+  border: 1px solid #cccccc;
+  margin: 20px auto;
+  border-radius: 20px;
+  padding: 25px 0px 0px;
+}
+
+.shopPicture{
+  margin: 10px auto 0px;
+}
+
+button.nextShopButton {
+  margin: 20px auto 0px;
+  position: relative;
+  display: inline-block;
+  padding: 1.5% 10%;
+  color: #FFF;
+  background: #478d8d;/*色*/
+  border-radius: 15px;/*角の丸み*/
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0, 0, 0, 0.05);
+  font-weight: bold;
+  border: solid 1.5px #72b8b8;/*線色*/
+  font-size: 50%;
+}
+  
+.getPositionButtonWrapper {
+  text-align: center;
+  
+}
+
+button.getPositionButton {
+  position: relative;
+  display: inline-block;
+  padding: 0.5% 1%;
+  color: #FFF;
+  background: #478d8d;/*色*/
+  border-radius: 15px;/*角の丸み*/
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.2), inset 0 -2px 0 rgba(0, 0, 0, 0.05);
+  font-weight: bold;
+  border: solid 1.5px #72b8b8;/*線色*/
+  font-size: 50%;
+}

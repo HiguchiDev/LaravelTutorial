@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+// phpQueryの読み込み
+//require_once("phpQuery-onefile.php");
+        
 class ShopSearchController extends Controller
 {
     /**
@@ -15,7 +18,7 @@ class ShopSearchController extends Controller
     {
         $sessionId = $request->session()->getId();
         
-        if(is_null($request->session()->get($sessionId . 'latitude')) || is_null($request->session()->get($sessionId . 'longitude'))){
+        if (is_null($request->session()->get($sessionId . 'latitude')) || is_null($request->session()->get($sessionId . 'longitude'))) {
             return view('shopSearch/session_faild');
         }
 
@@ -23,11 +26,10 @@ class ShopSearchController extends Controller
         $jsonList;
 
         if ($request->session()->has($shopInfoSessionKey)) {
-            echo "セッションから取得";
+            //echo "セッションから取得";
             $jsonList = $request->session()->get($shopInfoSessionKey, array());
-            
         } else {
-            echo "APIから取得";
+            //echo "APIから取得";
             $jsonList = $this->getShopInfoFromAPI($request);
             $request->session()->put($shopInfoSessionKey, $jsonList);
         }
@@ -38,6 +40,15 @@ class ShopSearchController extends Controller
         
         $latitudeAndLongitude = "緯度：" . $request->session()->get($sessionId . 'latitude') . " ";
         $latitudeAndLongitude .= "経度：" . $request->session()->get($sessionId . 'longitude');
+
+
+
+        // 取得したいwebサイトを読み込み
+        //$html = file_get_contents($shopInfo['url']);
+        //echo phpQuery::newDocument($html)->find("img")->text("src");
+
+        //var_dump($html);
+        //echo phpQuery::newDocument($html)->find("h3")->text();
 
         return view('shopSearch/index', compact('shopInfo', 'latitudeAndLongitude'));
     }
@@ -58,7 +69,7 @@ class ShopSearchController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new resource.///////////////////////////////////////////////////-　　　
      *
      * @return \Illuminate\Http\Response
      */
