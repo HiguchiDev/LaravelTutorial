@@ -6,7 +6,9 @@
 </head>
 <body>
   <div class = "shopInfo">
-    {{ $shopInfo['name'] }}
+  <a href= {{ $shopInfo['url'] }} >{{ $shopInfo['name'] }}</a>
+  <br>
+  距離：{{ $distance['distance_unit'] }}
     <div class = "shopPicture">
       <img src={{ $shopInfo['image_url']['shop_image1'] }} alt="店舗画像" width="200" height="200" border="0" />
     </div>
