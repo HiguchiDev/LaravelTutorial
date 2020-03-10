@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use AppReference\ApiKeys;
+//require_once 'ApiKeys.php';
 
 // phpQueryの読み込み
 //require_once("phpQuery-onefile.php");
@@ -57,16 +59,47 @@ class ShopSearchController extends Controller
             $shopInfo["address"]
         );
 
-        //var_dump( $distance );
-        // 取得したいwebサイトを読み込み
-        //$html = file_get_contents($shopInfo['url']);
-        //echo phpQuery::newDocument($html)->find("img")->text("src");
+        
 
-        //var_dump($html);
-        //echo phpQuery::newDocument($html)->find("h3")->text();
+        if (empty($shopInfo['image_url']['shop_image1'])) {
+            $shopImage = $this->getShopImageFromGoogleImageSearch($shopInfo['name']);
+
+            $shopInfo['image_url']['shop_image1'] = $shopImage;
+            echo "aa";
+        }
+        else{
+            echo "bb";
+        }
 
         return view('shopSearch/index', compact('shopInfo', 'distance'));
     }
+
+    public function getShopImageFromGoogleImageSearch($word){
+
+        
+        $baseurl = 'https://www.googleapis.com/customsearch/v1?key=AIzaSyDEOrfJPaO-lKcER3wCW8blUoRo99lYdDU&cx=009073077464763218888:4rjpzcdd1zq&searchType=image&q=';
+        //$word = urlencode($word);
+        //$baseurl .= $word;
+        echo $word;
+        //echo "URL" . $baseurl;
+        //$baseurl = 'https://www.googleapis.com/customsearch/v1?key=AIzaSyDEOrfJPaO-lKcER3wCW8blUoRo99lYdDU&cx=009073077464763218888:4rjpzcdd1zq&searchType=image&q=%E4%B8%8A%E9%87%8E%E6%96%87%E4%B9%9F';
+        
+        $myurl=$baseurl.urlencode($word);
+        $myjson=file_get_contents($myurl);
+        $recs=json_decode($myjson,true);
+        
+        //var_dump($recs['items']);
+
+        if(empty($recs['items'])){
+            return '';
+        }
+
+        return $recs['items'][0]['link'];   //一番最初に出た結果を格納
+                
+        //return $str;
+
+    }
+
     //GPSなどの緯度経度の２点間の直線距離を求める（世界測地系）
 
     //$lat1, $lon1 --- A地点の緯度経度
@@ -83,8 +116,9 @@ class ShopSearchController extends Controller
         $reqURL .= $from;
         $reqURL .= '&destination=';
         $reqURL .= $to;
-        $reqURL .= '&mode=walking&language=ja&key=AIzaSyDkAkXUpnqoNqbhQ8sdzM7URod4sZYxUr0';
+        $reqURL .= '&mode=walking&language=ja&key=' . 'AIzaSyDkAkXUpnqoNqbhQ8sdzM7URod4sZYxUr0';
 
+        //echo ApiKeys::getGoogleApiKey();
         //var_dump( $reqURL);
         
         //file_get_contentsでレスポンスを処理
