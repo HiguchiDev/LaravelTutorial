@@ -50,10 +50,6 @@ class ShopSearchController extends Controller
         $latitudeAndLongitude = "緯度：" . $request->session()->get($sessionId . 'latitude') . " ";
         $latitudeAndLongitude .= "経度：" . $request->session()->get($sessionId . 'longitude');
 
-        //echo $latitudeAndLongitude;
-        //echo $this->getAddress($request->session()->get($sessionId . 'latitude'), $request->session()->get($sessionId . 'longitude'));
-        //echo $shopInfo["address"];
-        
         $distance = $this->location_distance(
             $this->getAddress($request->session()->get($sessionId . 'latitude'), $request->session()->get($sessionId . 'longitude')),
             $shopInfo["address"]
@@ -62,13 +58,15 @@ class ShopSearchController extends Controller
         
 
         if (empty($shopInfo['image_url']['shop_image1'])) {
+            
             $shopImage = $this->getShopImageFromGoogleImageSearch($shopInfo['name']);
 
             $shopInfo['image_url']['shop_image1'] = $shopImage;
-            echo "aa";
+            
+            //echo "aa";
         }
         else{
-            echo "bb";
+            //echo "bb";
         }
 
         return view('shopSearch/index', compact('shopInfo', 'distance'));
@@ -80,7 +78,6 @@ class ShopSearchController extends Controller
         $baseurl = 'https://www.googleapis.com/customsearch/v1?key=AIzaSyDEOrfJPaO-lKcER3wCW8blUoRo99lYdDU&cx=009073077464763218888:4rjpzcdd1zq&searchType=image&q=';
         //$word = urlencode($word);
         //$baseurl .= $word;
-        echo $word;
         //echo "URL" . $baseurl;
         //$baseurl = 'https://www.googleapis.com/customsearch/v1?key=AIzaSyDEOrfJPaO-lKcER3wCW8blUoRo99lYdDU&cx=009073077464763218888:4rjpzcdd1zq&searchType=image&q=%E4%B8%8A%E9%87%8E%E6%96%87%E4%B9%9F';
         

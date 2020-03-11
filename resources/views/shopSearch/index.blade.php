@@ -19,7 +19,14 @@
 
   </div>
   
+      <!--<form action="/shopSearch" method = "post">-->
+  <form action="/shopImageURL" method = "get">
+    <button class="getShopImageButton" type="submit">画像取得</button>
+    <input id="shopName" type="hidden" type="text" name="shopName" value={{ $shopInfo['name'] }}>
+  </form>
+
   <div class = "getPositionButtonWrapper">
+    <!--<form action="/shopSearch" method = "post">-->
     <form action="/shopSearch" method = "post">
     <button class="getPositionButton" type="submit">位置情報リセット</button>
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
