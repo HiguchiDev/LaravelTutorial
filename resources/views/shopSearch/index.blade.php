@@ -1,14 +1,14 @@
 <head>
   <title>ぐるなび　選択結果</title>
   <link rel="stylesheet" href="{{ asset('css/ShopSearchCss.css') }}">
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script type="text/javascript" src="{{ asset('js/ShopSearchCss.js') }}"></script>
 </head>
 <body>
   <div class = "shopInfo">
   <a href= {{ $shopInfo['url'] }} target="_blank">{{ $shopInfo['name'] }}</a>
   <br>
-  距離：{{ $distance['text'] }}
+    距離：{{ $distance['text'] }}
     <div class = "shopPicture">
       <img src={{ $shopInfo['image_url']['shop_image1'] }} alt="店舗画像" width="200" height="200" border="0" />
     </div>
