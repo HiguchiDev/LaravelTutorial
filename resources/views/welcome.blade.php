@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Geolocation Sample</title>
+    <title>らんぐるTOP</title>
 </head>
 <body>
 
