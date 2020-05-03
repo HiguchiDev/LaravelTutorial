@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use AppReference\ApiKeys;
+use App\Jobs\CalcDistance;
+
 //require_once 'ApiKeys.php';
 
 // phpQueryの読み込み
@@ -11,6 +13,45 @@ use AppReference\ApiKeys;
         
 class ShopSearchController extends Controller
 {
+    public function getDistance(Request $request)
+    {
+
+        /*
+        $sessionId = $request->session()->getId();
+        $latitude = $request->session()->get($sessionId . 'latitude');
+        $longitude = $request->session()->get($sessionId . 'longitude');
+
+        //緯度経度が取得できなければセッションエラー
+        if (is_null($latitude) || is_null($longitude)) {
+            return view('shopSearch/session_faild');
+        }
+
+        */
+
+
+        $sessionId = $request->session()->getId();
+        $latitude = $request->session()->get($sessionId . 'latitude');
+        $longitude = $request->session()->get($sessionId . 'longitude');
+        $shopInfo = $request->session()->get($sessionId . 'shopInfo');
+
+        if (is_null($latitude) || is_null($longitude) || is_null($shopInfo)) {
+            return '距離取得エラー';
+        }
+
+        $distance = $this->getLocationDistance(
+            $this->getAddress($latitude, $longitude),
+            $shopInfo["address"]
+        );
+
+        return $distance['text'];
+        /*
+        echo $request->input('longitude');
+
+        $value_array = ['value1'=>1];
+        $json =  json_encode($value_array);
+        return response()->json($json);*/
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -18,6 +59,7 @@ class ShopSearchController extends Controller
      */
     public function index(Request $request)
     {
+        \Log::info('ログ出力テスト');
     
         $sessionId = $request->session()->getId();
         $latitude = $request->session()->get($sessionId . 'latitude');
@@ -30,11 +72,7 @@ class ShopSearchController extends Controller
 
         $shopJsonList = $this->getShopJsonList($request);
         $shopInfo = $this->getRandomShopInfo($shopJsonList);
-
-        $distance = $this->getLocationDistance(
-            $this->getAddress($latitude, $longitude),
-            $shopInfo["address"]
-        );
+        $request->session()->put($sessionId . 'shopInfo', $shopInfo);
 
         if (empty($shopInfo['image_url']['shop_image1'])) {
             
@@ -44,8 +82,10 @@ class ShopSearchController extends Controller
         }
         else{
         }
+        //phpinfo();
+        //CalcDistance::dispatch()->delay(now()->addMinutes(1));
 
-        return view('shopSearch/index', compact('shopInfo', 'distance'));
+        return view('shopSearch/index', compact('shopInfo'));
     }
 
     public function getShopJsonList($request){
@@ -131,9 +171,6 @@ class ShopSearchController extends Controller
     {
         mb_language("Japanese");//文字コードの設定
         mb_internal_encoding("UTF-8");
-
-        //住所を入れて緯度経度を求める。
-        //$address = urlencode($address);
 
         $url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $latitude . ',' . $longitude . '&key=AIzaSyDkAkXUpnqoNqbhQ8sdzM7URod4sZYxUr0&language=ja';
 

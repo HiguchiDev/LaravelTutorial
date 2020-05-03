@@ -17,3 +17,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('shopImageURL', 'shopImageURLController@index');
+Route::get('/shopSearch/distance/ajax', 'ShopSearchController@getDistance');
