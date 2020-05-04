@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use AppReference\ApiKeys;
 use App\Jobs\CalcDistance;
+use App\ShopImage;
 
 //require_once 'ApiKeys.php';
 
@@ -59,8 +60,6 @@ class ShopSearchController extends Controller
      */
     public function index(Request $request)
     {
-        \Log::info('ログ出力テスト');
-    
         $sessionId = $request->session()->getId();
         $latitude = $request->session()->get($sessionId . 'latitude');
         $longitude = $request->session()->get($sessionId . 'longitude');
@@ -71,9 +70,9 @@ class ShopSearchController extends Controller
         }
 
         $shopJsonList = $this->getShopJsonList($request);
+
         $shopInfo = $this->getRandomShopInfo($shopJsonList);
         $request->session()->put($sessionId . 'shopInfo', $shopInfo);
-
         if (empty($shopInfo['image_url']['shop_image1'])) {
             
             $shopImage = $this->getShopImageFromGoogleImageSearch($shopInfo['name']);
@@ -82,6 +81,9 @@ class ShopSearchController extends Controller
         }
         else{
         }
+
+        ShopImage::insertShopImage($shopInfo['name'], $shopInfo["address"], $shopInfo['image_url']['shop_image1']);
+
         //phpinfo();
         //CalcDistance::dispatch()->delay(now()->addMinutes(1));
 
@@ -96,10 +98,13 @@ class ShopSearchController extends Controller
         if ($request->session()->has($shopInfoSessionKey)) {
             //echo "セッションから取得";
             $shopJsonList = $request->session()->get($shopInfoSessionKey, array());
+            \Log::info('セッションからショップ情報取得');
+
         } else {
             //echo "APIから取得";
             $shopJsonList = $this->getShopInfoFromAPI($request);
             $request->session()->put($shopInfoSessionKey, $shopJsonList);
+            \Log::info('Google APIからショップ情報取得');
         }
 
         return $shopJsonList;
