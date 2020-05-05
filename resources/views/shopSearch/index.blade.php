@@ -4,6 +4,8 @@
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script type="text/javascript" src="{{ asset('js/ShopSearchCss.js') }}"></script>
   <script type="text/javascript" src="{{ asset('js/CalcDistance.js') }}"></script>
+  <script type="text/javascript" src="{{ asset('js/ShopImageLoad.js') }}"></script>
+  
 </head>
 <body>
   <div class = "shopInfo">
@@ -14,8 +16,8 @@
       <div id="loading"></div>
     </div>
 
-    <div class = "shopPicture">
-      <img src={{ $shopInfo['image_url']['shop_image1'] }} alt="店舗画像" width="200" height="200" border="0" />
+    <div id = "shopImage">
+      <div id="shopImageloading"></div>
     </div>
 
     <form action="/shopSearch">

@@ -14,6 +14,41 @@ use App\ShopImage;
         
 class ShopSearchController extends Controller
 {
+
+    public function getShopImage(Request $request){
+        $sessionId = $request->session()->getId();
+        $shopInfo = $request->session()->get($sessionId . 'shopInfo');
+
+        if (is_null($shopInfo)) {
+            return '店情報取得エラー';
+        }
+
+        $shop_image_id = ShopImage::getShopImageId($shopInfo['name'], $shopInfo["address"]);
+
+        if(empty($shop_image_id)){
+            if (empty($shopInfo['image_url']['shop_image1'])) {
+            
+                $shopImage = $this->getShopImageFromGoogleImageSearch($shopInfo['name']);
+    
+                $shopInfo['image_url']['shop_image1'] = $shopImage;
+            }
+
+            ShopImage::insertShopImage($shopInfo['name'], $shopInfo["address"], $shopInfo['image_url']['shop_image1']);
+            
+        }
+
+
+        if(empty($shopInfo['image_url']['shop_image1'])){
+            $shopInfo['image_url']['shop_image1'] = asset('/image/shopImages/') . '/' . $shop_image_id . '.jpg';
+        }
+
+        //echo $shopInfo['name'];
+        //echo $shopInfo['image_url']['shop_image1'];
+
+        return "<img src=" . $shopInfo['image_url']['shop_image1'] . " alt=\"店舗画像\" width=\"200\" height=\"200\" border=\"0\" />";
+        
+    }
+
     public function getDistance(Request $request)
     {
 
@@ -73,16 +108,8 @@ class ShopSearchController extends Controller
 
         $shopInfo = $this->getRandomShopInfo($shopJsonList);
         $request->session()->put($sessionId . 'shopInfo', $shopInfo);
-        if (empty($shopInfo['image_url']['shop_image1'])) {
-            
-            $shopImage = $this->getShopImageFromGoogleImageSearch($shopInfo['name']);
 
-            $shopInfo['image_url']['shop_image1'] = $shopImage;
-        }
-        else{
-        }
-
-        ShopImage::insertShopImage($shopInfo['name'], $shopInfo["address"], $shopInfo['image_url']['shop_image1']);
+        
 
         //phpinfo();
         //CalcDistance::dispatch()->delay(now()->addMinutes(1));

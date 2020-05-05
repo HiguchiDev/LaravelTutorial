@@ -11,6 +11,21 @@ class ShopImage extends Model
         'name', 'adress', 'shop_image_id',
     ];
 
+    public static function getShopImageId($shopName, $shopAdress){
+
+        $query = ShopImage::query();
+        $query->where('name',$shopName); 
+        $query->where('adress',$shopAdress);
+        $shopImage = $query->first();
+
+        if(is_null($shopImage)){
+            return null;
+        }
+
+        return $shopImage->shop_image_id;
+        
+    }
+
     public static function insertShopImage($shopName, $shopAdress, $shopImageURL) {
         
         /***************************ここは別途コントローラ切り出すべきかも***************************/
