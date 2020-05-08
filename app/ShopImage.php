@@ -47,9 +47,9 @@ class ShopImage extends Model
         }
     
         //画像を保存
-        file_put_contents(public_path() . '\\image\\shopImages\\' . $img_name . '.jpg', $img);
+        file_put_contents(public_path() . '/image/shopImages/' . $img_name . '.jpg', $img);
 
-        \Log::info("画像保存パス：" . public_path() . '\\image\\shopImages\\' . $img_name . '.jpg');
+        \Log::info("画像保存パス：" . public_path() . '/image/shopImages/' . $img_name . '.jpg');
         \Log::info($shopImageURL);
         //\Log::info($img);
         \Log::info($img_name);
