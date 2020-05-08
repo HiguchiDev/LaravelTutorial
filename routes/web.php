@@ -11,11 +11,9 @@
 |
 */
 
-//Route::get('book', 'BookController@index');
 Route::resource('shopSearch', 'ShopSearchController');
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('shopImageURL', 'shopImageURLController@index');
 Route::get('/shopSearch/distance/ajax', 'ShopSearchController@getDistance');
 Route::get('/shopSearch/getShopImage/ajax', 'ShopSearchController@getShopImage');
