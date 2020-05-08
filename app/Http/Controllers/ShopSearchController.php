@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use AppReference\ApiKeys;
+use App\Jobs\CalcDistance;
+use App\ShopImage;
+
 //require_once 'ApiKeys.php';
 
 // phpQueryの読み込み
@@ -11,6 +14,80 @@ use AppReference\ApiKeys;
         
 class ShopSearchController extends Controller
 {
+
+    public function getShopImage(Request $request){
+        $sessionId = $request->session()->getId();
+        $shopInfo = $request->session()->get($sessionId . 'shopInfo');
+
+        if (is_null($shopInfo)) {
+            return '店情報取得エラー';
+        }
+
+        $shop_image_id = ShopImage::getShopImageId($shopInfo['name'], $shopInfo["address"]);
+
+        if(empty($shop_image_id)){
+            if (empty($shopInfo['image_url']['shop_image1'])) {
+            
+                $shopImage = $this->getShopImageFromGoogleImageSearch($shopInfo['name']);
+    
+                $shopInfo['image_url']['shop_image1'] = $shopImage;
+            }
+
+            ShopImage::insertShopImage($shopInfo['name'], $shopInfo["address"], $shopInfo['image_url']['shop_image1']);
+            
+        }
+
+
+        if(empty($shopInfo['image_url']['shop_image1'])){
+            $shopInfo['image_url']['shop_image1'] = asset('/image/shopImages/') . '/' . $shop_image_id . '.jpg';
+        }
+
+        //echo $shopInfo['name'];
+        //echo $shopInfo['image_url']['shop_image1'];
+
+        return "<img src=" . $shopInfo['image_url']['shop_image1'] . " alt=\"店舗画像\" width=\"200\" height=\"200\" border=\"0\" />";
+        
+    }
+
+    public function getDistance(Request $request)
+    {
+
+        /*
+        $sessionId = $request->session()->getId();
+        $latitude = $request->session()->get($sessionId . 'latitude');
+        $longitude = $request->session()->get($sessionId . 'longitude');
+
+        //緯度経度が取得できなければセッションエラー
+        if (is_null($latitude) || is_null($longitude)) {
+            return view('shopSearch/session_faild');
+        }
+
+        */
+
+
+        $sessionId = $request->session()->getId();
+        $latitude = $request->session()->get($sessionId . 'latitude');
+        $longitude = $request->session()->get($sessionId . 'longitude');
+        $shopInfo = $request->session()->get($sessionId . 'shopInfo');
+
+        if (is_null($latitude) || is_null($longitude) || is_null($shopInfo)) {
+            return '距離取得エラー';
+        }
+
+        $distance = $this->getLocationDistance(
+            $this->getAddress($latitude, $longitude),
+            $shopInfo["address"]
+        );
+
+        return $distance['text'];
+        /*
+        echo $request->input('longitude');
+
+        $value_array = ['value1'=>1];
+        $json =  json_encode($value_array);
+        return response()->json($json);*/
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -18,58 +95,58 @@ class ShopSearchController extends Controller
      */
     public function index(Request $request)
     {
-    
         $sessionId = $request->session()->getId();
+        $latitude = $request->session()->get($sessionId . 'latitude');
+        $longitude = $request->session()->get($sessionId . 'longitude');
         
-        if (is_null($request->session()->get($sessionId . 'latitude')) || is_null($request->session()->get($sessionId . 'longitude'))) {
+        //緯度経度が取得できなければセッションエラー
+        if (is_null($latitude) || is_null($longitude)) {
             return view('shopSearch/session_faild');
         }
 
+        $shopJsonList = $this->getShopJsonList($request);
+
+        $shopInfo = $this->getRandomShopInfo($shopJsonList);
+        $request->session()->put($sessionId . 'shopInfo', $shopInfo);
+
+        
+
+        //phpinfo();
+        //CalcDistance::dispatch()->delay(now()->addMinutes(1));
+
+        return view('shopSearch/index', compact('shopInfo'));
+    }
+
+    public function getShopJsonList($request){
+        $sessionId = $request->session()->getId();
         $shopInfoSessionKey = $sessionId . "ShopSessionKey";
-        $jsonList;
+        $shopJsonList;
 
         if ($request->session()->has($shopInfoSessionKey)) {
             //echo "セッションから取得";
-            $jsonList = $request->session()->get($shopInfoSessionKey, array());
+            $shopJsonList = $request->session()->get($shopInfoSessionKey, array());
+            \Log::info('セッションからショップ情報取得');
+
         } else {
             //echo "APIから取得";
-            $jsonList = $this->getShopInfoFromAPI($request);
-            $request->session()->put($shopInfoSessionKey, $jsonList);
+            $shopJsonList = $this->getShopInfoFromAPI($request);
+            $request->session()->put($shopInfoSessionKey, $shopJsonList);
+            \Log::info('Google APIからショップ情報取得');
         }
-        
+
+        return $shopJsonList;
+    }
+
+    public function getRandomShopInfo($shopJsonList){
         $max = 99;
 
-        if(count($jsonList) <= $max){
-            $max = count($jsonList) - 1;
+        if(count($shopJsonList) <= $max){
+            $max = count($shopJsonList) - 1;
         }
 
         $randomIndex = rand(0, $max);
-        $shopInfoList = array_slice($jsonList, $randomIndex, 1, true);   //なんでキーがrandomIndexの連想配列が返却されるんだ・・・？
-        $shopInfo = $shopInfoList[$randomIndex];
-        
-        $latitudeAndLongitude = "緯度：" . $request->session()->get($sessionId . 'latitude') . " ";
-        $latitudeAndLongitude .= "経度：" . $request->session()->get($sessionId . 'longitude');
-
-        $distance = $this->location_distance(
-            $this->getAddress($request->session()->get($sessionId . 'latitude'), $request->session()->get($sessionId . 'longitude')),
-            $shopInfo["address"]
-        );
-
-        
-
-        if (empty($shopInfo['image_url']['shop_image1'])) {
-            
-            $shopImage = $this->getShopImageFromGoogleImageSearch($shopInfo['name']);
-
-            $shopInfo['image_url']['shop_image1'] = $shopImage;
-            
-            //echo "aa";
-        }
-        else{
-            //echo "bb";
-        }
-
-        return view('shopSearch/index', compact('shopInfo', 'distance'));
+        $shopInfoList = array_slice($shopJsonList, $randomIndex, 1, true);   //なんでキーがrandomIndexの連想配列が返却されるんだ・・・？
+        return $shopInfoList[$randomIndex];
     }
 
     public function getShopImageFromGoogleImageSearch($word){
@@ -101,23 +178,18 @@ class ShopSearchController extends Controller
 
     //$lat1, $lon1 --- A地点の緯度経度
     //$lat2, $lon2 --- B地点の緯度経度
-    public function location_distance($from, $to)
+    public function getLocationDistance($from, $to)
     {
         
         $from = urlencode($from);
         $to = urlencode($to);
 
-        
-        //echo $to;
         $reqURL = 'https://maps.googleapis.com/maps/api/directions/json?origin=';
         $reqURL .= $from;
         $reqURL .= '&destination=';
         $reqURL .= $to;
         $reqURL .= '&mode=walking&language=ja&key=' . 'AIzaSyDkAkXUpnqoNqbhQ8sdzM7URod4sZYxUr0';
 
-        //echo ApiKeys::getGoogleApiKey();
-        //var_dump( $reqURL);
-        
         //file_get_contentsでレスポンスを処理
         $json = file_get_contents($reqURL);
         //JSONをデコード
@@ -125,40 +197,12 @@ class ShopSearchController extends Controller
 
 
         return $jsonList['routes'][0]['legs'][0]['distance'];
-
-        /*
-        $lat_average = deg2rad($lat1 + (($lat2 - $lat1) / 2));//２点の緯度の平均
-        $lat_difference = deg2rad($lat1 - $lat2);//２点の緯度差
-        $lon_difference = deg2rad($lon1 - $lon2);//２点の経度差
-        $curvature_radius_tmp = 1 - 0.00669438 * pow(sin($lat_average), 2);
-        $meridian_curvature_radius = 6335439.327 / sqrt(pow($curvature_radius_tmp, 3));//子午線曲率半径
-        $prime_vertical_circle_curvature_radius = 6378137 / sqrt($curvature_radius_tmp);//卯酉線曲率半径
-        
-    //２点間の距離
-        $distance = pow($meridian_curvature_radius * $lat_difference, 2) + pow($prime_vertical_circle_curvature_radius * cos($lat_average) * $lon_difference, 2);
-        $distance = sqrt($distance);
-    
-        $distance_unit = round($distance);
-        if ($distance_unit < 1000) {//1000m以下ならメートル表記
-            $distance_unit = $distance_unit."m";
-        } else {//1000m以上ならkm表記
-            $distance_unit = round($distance_unit / 100);
-            $distance_unit = ($distance_unit / 10)."km";
-        }
-    
-        //$hoge['distance']で小数点付きの直線距離を返す（メートル）
-        //$hoge['distance_unit']で整形された直線距離を返す（1000m以下ならメートルで記述 例：836m ｜ 1000m以下は小数点第一位以上の数をkmで記述 例：2.8km）
-        return array("distance" => $distance, "distance_unit" => $distance_unit);
-        */
     }
 
     private function getAddress($latitude, $longitude)
     {
         mb_language("Japanese");//文字コードの設定
         mb_internal_encoding("UTF-8");
-
-        //住所を入れて緯度経度を求める。
-        //$address = urlencode($address);
 
         $url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $latitude . ',' . $longitude . '&key=AIzaSyDkAkXUpnqoNqbhQ8sdzM7URod4sZYxUr0&language=ja';
 
